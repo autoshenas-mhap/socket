@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chat App</title>
+    <style>
+      #status {
+        color: green;
+      }
+      .disconnected {
+        color: red !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status">Connecting...</div>
+    <form id="form">
+      <input id="messageInput" type="text" placeholder="Enter message" />
+      <button type="submit" id="sendButton">Send</button>
+    </form>
+    <div id="chat"></div>
+
+    <script
+      src="https://cdn.socket.io/4.7.2/socket.io.min.js"
+      integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      $(function() {
+        const ws = new WebSocket('ws://localhost:8000/websocket');
+
+        ws.onopen = function() {
+          $('#status').text('Server Connected (Real-time)');
+          console.log('WebSocket connected!');
+        };
+
+        ws.onmessage = function(event) {
+          $('#chat').append('<div>' + event.data + '</div>');
+        };
+
+        ws.onclose = function() {
+          $('#status').text('Server Disconnected').addClass('disconnected');
+          console.log('WebSocket disconnected');
+        };
+
+        $('#form').submit(function(e) {
+          e.preventDefault();
+          var message = $('#messageInput').val();
+          ws.send(message);
+          $('#messageInput').val('');
+        });
+      });
+    </script>
+  </body>
+</html>
